@@ -32,6 +32,7 @@ export interface Notification {
 export declare class DatabaseService implements OnModuleInit {
     private readonly dbDirectory;
     private readonly dbFilePath;
+    constructor();
     private data;
     onModuleInit(): void;
     private ensureDbExists;

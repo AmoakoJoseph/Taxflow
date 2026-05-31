@@ -1,6 +1,7 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import * as fs from 'fs';
 import * as path from 'path';
+import * as os from 'os';
 
 export interface User {
   id: string;
@@ -43,8 +44,18 @@ interface DbSchema {
 
 @Injectable()
 export class DatabaseService implements OnModuleInit {
-  private readonly dbDirectory = path.join(__dirname, '..', '..', 'data');
-  private readonly dbFilePath = path.join(this.dbDirectory, 'db.json');
+  private readonly dbDirectory: string;
+  private readonly dbFilePath: string;
+
+  constructor() {
+    if (process.env.VERCEL) {
+      this.dbDirectory = os.tmpdir();
+      this.dbFilePath = path.join(this.dbDirectory, 'taxflow_db.json');
+    } else {
+      this.dbDirectory = path.join(__dirname, '..', '..', 'data');
+      this.dbFilePath = path.join(this.dbDirectory, 'db.json');
+    }
+  }
 
   private data: DbSchema = {
     users: [],
@@ -58,11 +69,32 @@ export class DatabaseService implements OnModuleInit {
   }
 
   private ensureDbExists() {
-    if (!fs.existsSync(this.dbDirectory)) {
-      fs.mkdirSync(this.dbDirectory, { recursive: true });
+    try {
+      if (!fs.existsSync(this.dbDirectory)) {
+        fs.mkdirSync(this.dbDirectory, { recursive: true });
+      }
+    } catch (error) {
+      console.warn('Warning: Could not create db directory:', error);
     }
+
     if (!fs.existsSync(this.dbFilePath)) {
-      this.saveData();
+      // Seed from original repository db.json if running in serverless tmp folder
+      const seedFilePath = path.join(__dirname, '..', '..', 'data', 'db.json');
+      let seeded = false;
+      if (fs.existsSync(seedFilePath)) {
+        try {
+          const seedData = fs.readFileSync(seedFilePath, 'utf8');
+          fs.writeFileSync(this.dbFilePath, seedData, 'utf8');
+          seeded = true;
+          console.log(`Database seeded successfully from ${seedFilePath} to ${this.dbFilePath}`);
+        } catch (err) {
+          console.error('Failed to copy seed database file:', err);
+        }
+      }
+
+      if (!seeded) {
+        this.saveData();
+      }
     }
   }
 

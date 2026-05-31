@@ -38,14 +38,28 @@ var __importStar = (this && this.__importStar) || (function () {
         return result;
     };
 })();
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.DatabaseService = void 0;
 const common_1 = require("@nestjs/common");
 const fs = __importStar(require("fs"));
 const path = __importStar(require("path"));
+const os = __importStar(require("os"));
 let DatabaseService = class DatabaseService {
-    dbDirectory = path.join(__dirname, '..', '..', 'data');
-    dbFilePath = path.join(this.dbDirectory, 'db.json');
+    dbDirectory;
+    dbFilePath;
+    constructor() {
+        if (process.env.VERCEL) {
+            this.dbDirectory = os.tmpdir();
+            this.dbFilePath = path.join(this.dbDirectory, 'taxflow_db.json');
+        }
+        else {
+            this.dbDirectory = path.join(__dirname, '..', '..', 'data');
+            this.dbFilePath = path.join(this.dbDirectory, 'db.json');
+        }
+    }
     data = {
         users: [],
         transactions: [],
@@ -56,11 +70,31 @@ let DatabaseService = class DatabaseService {
         this.loadData();
     }
     ensureDbExists() {
-        if (!fs.existsSync(this.dbDirectory)) {
-            fs.mkdirSync(this.dbDirectory, { recursive: true });
+        try {
+            if (!fs.existsSync(this.dbDirectory)) {
+                fs.mkdirSync(this.dbDirectory, { recursive: true });
+            }
+        }
+        catch (error) {
+            console.warn('Warning: Could not create db directory:', error);
         }
         if (!fs.existsSync(this.dbFilePath)) {
-            this.saveData();
+            const seedFilePath = path.join(__dirname, '..', '..', 'data', 'db.json');
+            let seeded = false;
+            if (fs.existsSync(seedFilePath)) {
+                try {
+                    const seedData = fs.readFileSync(seedFilePath, 'utf8');
+                    fs.writeFileSync(this.dbFilePath, seedData, 'utf8');
+                    seeded = true;
+                    console.log(`Database seeded successfully from ${seedFilePath} to ${this.dbFilePath}`);
+                }
+                catch (err) {
+                    console.error('Failed to copy seed database file:', err);
+                }
+            }
+            if (!seeded) {
+                this.saveData();
+            }
         }
     }
     loadData() {
@@ -170,6 +204,7 @@ let DatabaseService = class DatabaseService {
 };
 exports.DatabaseService = DatabaseService;
 exports.DatabaseService = DatabaseService = __decorate([
-    (0, common_1.Injectable)()
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [])
 ], DatabaseService);
 //# sourceMappingURL=database.service.js.map
