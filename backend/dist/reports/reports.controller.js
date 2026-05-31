@@ -15,6 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.ReportsController = void 0;
 const common_1 = require("@nestjs/common");
 const reports_service_1 = require("./reports.service");
+const report_query_dto_1 = require("./report-query.dto");
 let ReportsController = class ReportsController {
     reportsService;
     constructor(reportsService) {
@@ -26,9 +27,9 @@ let ReportsController = class ReportsController {
         }
         return authHeader.replace('Bearer taxflow-session-', '');
     }
-    getTaxSummary(authHeader, startDate, endDate) {
+    getTaxSummary(authHeader, query) {
         const userId = this.extractUserId(authHeader);
-        return this.reportsService.getTaxSummary(userId, startDate, endDate);
+        return this.reportsService.getTaxSummary(userId, query.startDate, query.endDate);
     }
     getNotifications(authHeader) {
         const userId = this.extractUserId(authHeader);
@@ -44,10 +45,9 @@ exports.ReportsController = ReportsController;
 __decorate([
     (0, common_1.Get)('reports/summary'),
     __param(0, (0, common_1.Headers)('authorization')),
-    __param(1, (0, common_1.Query)('startDate')),
-    __param(2, (0, common_1.Query)('endDate')),
+    __param(1, (0, common_1.Query)(report_query_dto_1.TaxSummaryQueryPipe)),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, String, String]),
+    __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", void 0)
 ], ReportsController.prototype, "getTaxSummary", null);
 __decorate([

@@ -1,12 +1,13 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { TaxService } from './tax.service';
+import { VatService } from './vat.service';
 
 describe('TaxService', () => {
   let service: TaxService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [TaxService],
+      providers: [TaxService, VatService],
     }).compile();
 
     service = module.get<TaxService>(TaxService);
@@ -22,14 +23,14 @@ describe('TaxService', () => {
       expect(result).toBe(0);
     });
 
-    it('should calculate 20% effective VAT if VAT-registered (15% standard + 5% GETFund/NHIL)', () => {
+    it('should extract 20% effective VAT from inclusive 1000 GHS (expect 166.67 GHS)', () => {
       const result = service.calculateVat(1000, true);
-      expect(result).toBe(200); // 1000 * 0.20
+      expect(result).toBe(166.67); // 1000 - (1000 / 1.2) = 166.67
     });
 
-    it('should round VAT calculations to 2 decimal places', () => {
+    it('should round inclusive VAT calculations to 2 decimal places', () => {
       const result = service.calculateVat(333.33, true);
-      expect(result).toBe(66.67); // 333.33 * 0.2 = 66.666 -> rounds to 66.67
+      expect(result).toBe(55.56); // 333.33 - (333.33 / 1.2) = 55.555 -> rounds to 55.56
     });
   });
 

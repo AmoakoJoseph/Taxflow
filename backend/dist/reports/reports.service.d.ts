@@ -24,6 +24,7 @@ export interface TaxSummary {
 }
 export declare class ReportsService {
     private readonly db;
+    private readonly rules;
     constructor(db: DatabaseService);
     private verifyUser;
     getTaxSummary(userId: string, startDate?: string, endDate?: string): TaxSummary;

@@ -1,3 +1,5 @@
+import { VatService, VatReport } from './vat.service';
+import { Transaction } from '../database/database.service';
 export interface PayeBreakdown {
     basicSalary: number;
     ssnitDeduction: number;
@@ -11,8 +13,11 @@ export interface PayeBreakdown {
     }[];
 }
 export declare class TaxService {
-    private readonly MONTHLY_BANDS;
+    private readonly vatService;
+    private readonly rules;
+    constructor(vatService: VatService);
     calculatePaye(basicSalary: number): PayeBreakdown;
     calculateVat(amount: number, isVatRegistered: boolean): number;
+    calculateVATReport(transactions: Transaction[], startDate?: string, endDate?: string): VatReport;
     calculateWht(amount: number, category: string): number;
 }

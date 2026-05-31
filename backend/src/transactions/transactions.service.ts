@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { DatabaseService, Transaction } from '../database/database.service';
 import { TaxService } from '../tax/tax.service';
+import { CreateTransactionDto, UpdateTransactionDto } from './transaction.dto';
 import * as crypto from 'crypto';
 
 @Injectable()
@@ -25,13 +26,7 @@ export class TransactionsService {
 
   createTransaction(
     userId: string,
-    data: {
-      type: 'income' | 'expense' | 'payroll';
-      amount: number;
-      category: string;
-      date: string;
-      description: string;
-    }
+    data: CreateTransactionDto
   ): Transaction {
     const user = this.verifyUser(userId);
     const id = crypto.randomUUID();
@@ -72,13 +67,7 @@ export class TransactionsService {
   updateTransaction(
     userId: string,
     id: string,
-    updates: {
-      type?: 'income' | 'expense' | 'payroll';
-      amount?: number;
-      category?: string;
-      date?: string;
-      description?: string;
-    }
+    updates: UpdateTransactionDto
   ): Transaction {
     const user = this.verifyUser(userId);
     const existing = this.db.getTransactionById(id);

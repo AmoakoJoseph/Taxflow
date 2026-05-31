@@ -1,0 +1,62 @@
+{
+  "users": [
+    {
+      "id": "demo-user-001",
+      "email": "demo@taxflow.local",
+      "passwordHash": "ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f",
+      "businessName": "Akwaaba Office Supplies",
+      "tin": "GHA-DEMO-001",
+      "vatRegistered": true,
+      "industryType": "Retail and Services"
+    }
+  ],
+  "transactions": [
+    {
+      "id": "demo-income-001",
+      "userId": "demo-user-001",
+      "type": "income",
+      "amount": 5000,
+      "category": "Goods",
+      "date": "2026-05-10",
+      "description": "Office stationery sales",
+      "vatAmount": 1000,
+      "payeAmount": 0,
+      "whtAmount": 150
+    },
+    {
+      "id": "demo-expense-001",
+      "userId": "demo-user-001",
+      "type": "expense",
+      "amount": 1200,
+      "category": "Services",
+      "date": "2026-05-12",
+      "description": "Accounting service payment",
+      "vatAmount": 240,
+      "payeAmount": 0,
+      "whtAmount": 90
+    },
+    {
+      "id": "demo-payroll-001",
+      "userId": "demo-user-001",
+      "type": "payroll",
+      "amount": 2500,
+      "category": "Salaries",
+      "date": "2026-05-25",
+      "description": "Monthly staff salary",
+      "vatAmount": 0,
+      "payeAmount": 304.19,
+      "whtAmount": 0
+    }
+  ],
+  "notifications": [
+    {
+      "id": "demo-notification-001",
+      "userId": "demo-user-001",
+      "type": "info",
+      "title": "Welcome to Taxflow",
+      "message": "This demo account contains sample transactions for a final year project presentation.",
+      "date": "2026-05-31",
+      "read": false
+    }
+  ]
+}

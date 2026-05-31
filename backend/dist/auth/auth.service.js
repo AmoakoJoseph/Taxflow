@@ -46,21 +46,22 @@ exports.AuthService = void 0;
 const common_1 = require("@nestjs/common");
 const database_service_1 = require("../database/database.service");
 const crypto = __importStar(require("crypto"));
+const bcrypt = __importStar(require("bcrypt"));
 let AuthService = class AuthService {
     db;
     constructor(db) {
         this.db = db;
     }
-    hashPassword(password) {
-        return crypto.createHash('sha256').update(password).digest('hex');
+    async hashPassword(password) {
+        return bcrypt.hash(password, 10);
     }
-    register(email, password, businessName, tin, vatRegistered, industryType) {
+    async register(email, password, businessName, tin, vatRegistered, industryType) {
         const existing = this.db.getUserByEmail(email);
         if (existing) {
             throw new common_1.BadRequestException('A business with this email is already registered');
         }
         const id = crypto.randomUUID();
-        const passwordHash = this.hashPassword(password);
+        const passwordHash = await this.hashPassword(password);
         const newUser = {
             id,
             email,
@@ -83,13 +84,13 @@ let AuthService = class AuthService {
         const { passwordHash: _, ...result } = newUser;
         return result;
     }
-    login(email, password) {
+    async login(email, password) {
         const user = this.db.getUserByEmail(email);
         if (!user) {
             throw new common_1.UnauthorizedException('Invalid email or password');
         }
-        const passwordHash = this.hashPassword(password);
-        if (user.passwordHash !== passwordHash) {
+        const isMatch = await bcrypt.compare(password, user.passwordHash);
+        if (!isMatch) {
             throw new common_1.UnauthorizedException('Invalid email or password');
         }
         const { passwordHash: _, ...userWithoutHash } = user;

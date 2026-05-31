@@ -1,5 +1,7 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { DatabaseService, Transaction, Notification } from '../database/database.service';
+import { DatabaseService, Notification } from '../database/database.service';
+import { GHANA_TAX_RULES_2026 } from '../tax/tax.constants';
+import * as crypto from 'crypto';
 
 export interface TaxSummary {
   businessName: string;
@@ -18,15 +20,17 @@ export interface TaxSummary {
     totalPaye: number;
   };
   whtBreakdown: {
-    whtSuffered: number; // Tax withheld from our income by clients (asset credit)
-    whtWithheld: number; // Tax we withheld from suppliers (liability to remit to GRA)
+    whtSuffered: number;
+    whtWithheld: number;
     netWhtBalance: number;
   };
-  totalEstimatedTaxOwed: number; // VAT Payable + PAYE + WHT Withheld
+  totalEstimatedTaxOwed: number;
 }
 
 @Injectable()
 export class ReportsService {
+  private readonly rules = GHANA_TAX_RULES_2026;
+
   constructor(private readonly db: DatabaseService) {}
 
   private verifyUser(userId: string) {
@@ -41,7 +45,6 @@ export class ReportsService {
     const user = this.verifyUser(userId);
     let transactions = this.db.getTransactions(userId);
 
-    // Apply date filters if provided
     if (startDate) {
       transactions = transactions.filter(t => t.date >= startDate);
     }
@@ -52,12 +55,9 @@ export class ReportsService {
     let totalIncome = 0;
     let totalExpense = 0;
     let totalPayroll = 0;
-
     let outputVat = 0;
     let inputVat = 0;
-
     let totalPaye = 0;
-
     let whtSuffered = 0;
     let whtWithheld = 0;
 
@@ -83,53 +83,51 @@ export class ReportsService {
       businessName: user.businessName,
       tin: user.tin,
       vatRegistered: user.vatRegistered,
-      totalIncome: Math.round(totalIncome * 100) / 100,
-      totalExpense: Math.round(totalExpense * 100) / 100,
-      totalPayroll: Math.round(totalPayroll * 100) / 100,
-      netProfit: Math.round((totalIncome - totalExpense - totalPayroll) * 100) / 100,
+      totalIncome: roundMoney(totalIncome),
+      totalExpense: roundMoney(totalExpense),
+      totalPayroll: roundMoney(totalPayroll),
+      netProfit: roundMoney(totalIncome - totalExpense - totalPayroll),
       vatBreakdown: {
-        outputVat: Math.round(outputVat * 100) / 100,
-        inputVat: Math.round(inputVat * 100) / 100,
-        vatPayable: Math.round(vatPayable * 100) / 100,
+        outputVat: roundMoney(outputVat),
+        inputVat: roundMoney(inputVat),
+        vatPayable: roundMoney(vatPayable),
       },
       payeBreakdown: {
-        totalPaye: Math.round(totalPaye * 100) / 100,
+        totalPaye: roundMoney(totalPaye),
       },
       whtBreakdown: {
-        whtSuffered: Math.round(whtSuffered * 100) / 100,
-        whtWithheld: Math.round(whtWithheld * 100) / 100,
-        netWhtBalance: Math.round((whtWithheld - whtSuffered) * 100) / 100,
+        whtSuffered: roundMoney(whtSuffered),
+        whtWithheld: roundMoney(whtWithheld),
+        netWhtBalance: roundMoney(whtWithheld - whtSuffered),
       },
-      totalEstimatedTaxOwed: Math.round(totalEstimatedTaxOwed * 100) / 100,
+      totalEstimatedTaxOwed: roundMoney(totalEstimatedTaxOwed),
     };
   }
 
   getNotifications(userId: string): Notification[] {
     this.verifyUser(userId);
-    
-    // Check if there are upcoming deadlines and dynamically inject notifications
+
     const today = new Date();
     const currentDay = today.getDate();
-    const nextMonthName = new Date(today.getFullYear(), today.getMonth() + 1, 1).toLocaleString('en-US', { month: 'long' });
-    
+    const nextMonthName = new Date(today.getFullYear(), today.getMonth() + 1, 1).toLocaleString('en-US', {
+      month: 'long',
+    });
     const userNotifications = this.db.getNotifications(userId);
-    
-    // Check if we need to auto-generate GRA monthly filing reminders
-    // In Ghana, PAYE, VAT, and Withholding Tax filings are due by the 15th of the following month
-    const deadlineDay = 15;
+
+    const deadlineDay = this.rules.filingDeadlines.payeAndWhtDayOfMonth;
     const daysRemaining = deadlineDay - currentDay;
 
-    if (daysRemaining > 0 && daysRemaining <= 15) {
-      const reminderTitle = 'Filing Deadline Approaching ⏳';
+    if (daysRemaining > 0 && daysRemaining <= this.rules.filingDeadlines.reminderWindowDays) {
+      const reminderTitle = 'PAYE/WHT Filing Deadline Approaching';
       const exists = userNotifications.some(n => n.title === reminderTitle && !n.read);
-      
+
       if (!exists) {
         this.db.createNotification({
-          id: Math.random().toString(36).substring(2),
+          id: crypto.randomUUID(),
           userId,
           type: 'warning',
           title: reminderTitle,
-          message: `GRA filing deadline is coming up on the 15th of ${nextMonthName}. Ensure all VAT, PAYE, and Withholding taxes are finalized.`,
+          message: `PAYE and Withholding Tax filings are due on the 15th of ${nextMonthName}. VAT/NHIL filings are due by ${this.rules.filingDeadlines.vatDueLabel}.`,
           date: today.toISOString().split('T')[0],
           read: false,
         });
@@ -141,6 +139,10 @@ export class ReportsService {
 
   readNotification(userId: string, id: string): boolean {
     this.verifyUser(userId);
-    return this.db.markNotificationAsRead(id);
+    return this.db.markNotificationAsRead(id, userId);
   }
+}
+
+function roundMoney(amount: number): number {
+  return Math.round(amount * 100) / 100;
 }

@@ -9,13 +9,16 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.TaxModule = void 0;
 const common_1 = require("@nestjs/common");
 const tax_service_1 = require("./tax.service");
+const vat_service_1 = require("./vat.service");
+const tax_controller_1 = require("./tax.controller");
 let TaxModule = class TaxModule {
 };
 exports.TaxModule = TaxModule;
 exports.TaxModule = TaxModule = __decorate([
     (0, common_1.Module)({
-        providers: [tax_service_1.TaxService],
-        exports: [tax_service_1.TaxService],
+        controllers: [tax_controller_1.TaxController],
+        providers: [tax_service_1.TaxService, vat_service_1.VatService],
+        exports: [tax_service_1.TaxService, vat_service_1.VatService],
     })
 ], TaxModule);
 //# sourceMappingURL=tax.module.js.map

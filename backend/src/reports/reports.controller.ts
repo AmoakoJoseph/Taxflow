@@ -1,5 +1,7 @@
 import { Controller, Get, Put, Param, Query, Headers, UnauthorizedException } from '@nestjs/common';
 import { ReportsService } from './reports.service';
+import { TaxSummaryQueryPipe } from './report-query.dto';
+import type { TaxSummaryQueryDto } from './report-query.dto';
 
 @Controller('api')
 export class ReportsController {
@@ -15,11 +17,10 @@ export class ReportsController {
   @Get('reports/summary')
   getTaxSummary(
     @Headers('authorization') authHeader: string | undefined,
-    @Query('startDate') startDate?: string,
-    @Query('endDate') endDate?: string
+    @Query(TaxSummaryQueryPipe) query: TaxSummaryQueryDto
   ) {
     const userId = this.extractUserId(authHeader);
-    return this.reportsService.getTaxSummary(userId, startDate, endDate);
+    return this.reportsService.getTaxSummary(userId, query.startDate, query.endDate);
   }
 
   @Get('notifications')

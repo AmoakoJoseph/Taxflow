@@ -8,6 +8,15 @@
       "tin": "GHA-724153723-6",
       "vatRegistered": true,
       "industryType": "Services"
+    },
+    {
+      "id": "9a5460a1-f664-4f22-b80e-34b5683ea80d",
+      "email": "amoakoantwiboasiakojoseph@gmail.com",
+      "passwordHash": "$2b$10$SjOYYS3K14Q5siA6DwGcce2DH9Z3g98d0dU60mvAcjw.sbwgNr7Cq",
+      "businessName": "jkjkk",
+      "tin": "kkkllk",
+      "vatRegistered": true,
+      "industryType": "Services"
     }
   ],
   "transactions": [
@@ -22,6 +31,42 @@
       "vatAmount": 822.2,
       "payeAmount": 0,
       "whtAmount": 308.33
+    },
+    {
+      "id": "c304a5d3-2376-449e-983a-caca98a38772",
+      "userId": "a480469f-ee4d-43b8-9895-2127c46c36a3",
+      "type": "expense",
+      "amount": 1199.95,
+      "category": "Services",
+      "date": "2026-05-31",
+      "description": "jfkjkjs",
+      "vatAmount": 239.99,
+      "payeAmount": 0,
+      "whtAmount": 90
+    },
+    {
+      "id": "661670ab-3195-4073-94ae-1c1b811bc218",
+      "userId": "a480469f-ee4d-43b8-9895-2127c46c36a3",
+      "type": "payroll",
+      "amount": 2500,
+      "category": "Salaries",
+      "date": "2026-05-31",
+      "description": "Employee",
+      "vatAmount": 0,
+      "payeAmount": 304.19,
+      "whtAmount": 0
+    },
+    {
+      "id": "cd7447f9-f05d-4f49-b498-d89b3bf0c645",
+      "userId": "a480469f-ee4d-43b8-9895-2127c46c36a3",
+      "type": "income",
+      "amount": 1230,
+      "category": "Goods",
+      "date": "2026-05-31",
+      "description": "files",
+      "vatAmount": 205,
+      "payeAmount": 0,
+      "whtAmount": 36.9
     }
   ],
   "notifications": [
@@ -32,7 +77,16 @@
       "title": "Welcome to Taxflow! 🇬🇭",
       "message": "Welcome, Ace Business. Setup your business ledger to automatically calculate VAT, PAYE, and Withholding Taxes. Keep your TIN (GHA-724153723-6) ready for filing.",
       "date": "2026-05-31",
-      "read": false
+      "read": true
+    },
+    {
+      "id": "276ced0a-f59c-4ae1-b6ca-d41127e5b230",
+      "userId": "9a5460a1-f664-4f22-b80e-34b5683ea80d",
+      "type": "info",
+      "title": "Welcome to Taxflow! 🇬🇭",
+      "message": "Welcome, jkjkk. Setup your business ledger to automatically calculate VAT, PAYE, and Withholding Taxes. Keep your TIN (kkkllk) ready for filing.",
+      "date": "2026-05-31",
+      "read": true
     }
   ]
 }

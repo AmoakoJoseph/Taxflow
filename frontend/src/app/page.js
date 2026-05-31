@@ -17,7 +17,9 @@ const Icons = {
   Warning: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" x2="12" y1="9" y2="13"/><line x1="12" x2="12.01" y1="17" y2="17"/></svg>
 };
 
-const API_BASE = 'http://localhost:3001';
+const API_BASE = typeof window !== 'undefined'
+  ? (window.location.origin.includes('localhost') ? 'http://localhost:3001' : '/_backend')
+  : 'http://localhost:3001';
 
 export default function TaxflowApp() {
   // Navigation & Screens
@@ -591,7 +593,7 @@ export default function TaxflowApp() {
       } else if (text.includes('withholding') || text.includes('wht')) {
         reply = "Withholding Tax (WHT) in Ghana requires a registered withholding agent to deduct taxes from payments. The rates for residents are 3% for goods, 5% for works, and 7.5% for services for annual cumulative payments over GH¢2,000.";
       } else if (text.includes('deadline') || text.includes('due date') || text.includes('when to file')) {
-        reply = "In Ghana, VAT returns, PAYE returns, and Withholding Tax deductions must be filed and paid to the GRA by the 15th day of the following month. For example, your May taxes must be filed by June 15th.";
+        reply = "In Ghana, PAYE returns and Withholding Tax payments are due by the 15th day of the following month. VAT/NHIL returns are due separately by the last working day of the following month.";
       } else if (text.includes('ssnit')) {
         reply = "SSNIT consists of employee (5.5%) and employer (13%) contributions, totaling 18.5% of basic salary. This is paid to the Social Security Trust and must be remitted by the 14th day of the following month.";
       }
@@ -1241,7 +1243,7 @@ export default function TaxflowApp() {
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: '800', fontSize: '15px', borderTop: '2px solid var(--primary)', paddingTop: '8px' }}>
                     <span>Net Filing Remittance Due:</span>
-                    <span style={{ color: 'var(--primary)' }}>₵{Math.max(0, taxSummary.totalEstimatedTaxOwed - taxSummary.whtBreakdown.whtSuffered)}</span>
+                    <span style={{ color: 'var(--primary)' }}>₵{Math.max(0, Math.round((taxSummary.totalEstimatedTaxOwed - taxSummary.whtBreakdown.whtSuffered) * 100) / 100)}</span>
                   </div>
                 </div>
               </div>
@@ -1485,7 +1487,7 @@ export default function TaxflowApp() {
                     } else if (text.includes('wht') || text.includes('withholding')) {
                       reply = "Withholding Tax (WHT) in Ghana requires a registered withholding agent to deduct taxes from payments. The rates for residents are 3% for goods, 5% for works, and 7.5% for services for annual cumulative payments over GH¢2,000.";
                     } else if (text.includes('deadline')) {
-                      reply = "In Ghana, VAT returns, PAYE returns, and Withholding Tax deductions must be filed and paid to the GRA by the 15th day of the following month. For example, your May taxes must be filed by June 15th.";
+                      reply = "In Ghana, PAYE returns and Withholding Tax payments are due by the 15th day of the following month. VAT/NHIL returns are due separately by the last working day of the following month.";
                     }
                     setChatMessages(prev => [...prev, { sender: 'bot', text: reply }]);
                   }, 600);

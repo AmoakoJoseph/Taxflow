@@ -1,4 +1,7 @@
 import { Injectable } from '@nestjs/common';
+import { GHANA_TAX_RULES_2026 } from './tax.constants';
+import { VatService, VatReport } from './vat.service';
+import { Transaction } from '../database/database.service';
 
 export interface PayeBreakdown {
   basicSalary: number;
@@ -15,36 +18,22 @@ export interface PayeBreakdown {
 
 @Injectable()
 export class TaxService {
-  // 2026 MONTHLY Resident PAYE brackets
-  // Band 1: First 490 @ 0%
-  // Band 2: Next 110 (up to 600) @ 5%
-  // Band 3: Next 130 (up to 730) @ 10%
-  // Band 4: Next 3,166.67 (up to 3,896.67) @ 17.5%
-  // Band 5: Next 16,000 (up to 19,896.67) @ 25%
-  // Band 6: Next 30,520 (up to 50,416.67) @ 30%
-  // Band 7: Above 50,416.67 @ 35%
-  private readonly MONTHLY_BANDS = [
-    { limit: 490, rate: 0 },
-    { limit: 110, rate: 0.05 },
-    { limit: 130, rate: 0.10 },
-    { limit: 3166.67, rate: 0.175 },
-    { limit: 16000, rate: 0.25 },
-    { limit: 30520, rate: 0.30 },
-    { limit: Infinity, rate: 0.35 },
-  ];
+  private readonly rules = GHANA_TAX_RULES_2026;
+
+  constructor(private readonly vatService: VatService) {}
 
   /**
    * Calculates PAYE (income tax) for a resident employee based on basic salary.
    * Deducts 5.5% employee SSNIT first to find chargeable income, then applies progressive bands.
    */
   calculatePaye(basicSalary: number): PayeBreakdown {
-    const ssnitDeduction = basicSalary * 0.055;
+    const ssnitDeduction = basicSalary * this.rules.paye.employeeSsnitRate;
     const chargeableIncome = basicSalary - ssnitDeduction;
     let remainingIncome = chargeableIncome;
     let totalTax = 0;
     const bracketsUsed = [];
 
-    for (const band of this.MONTHLY_BANDS) {
+    for (const band of this.rules.paye.monthlyBands) {
       if (remainingIncome <= 0) break;
 
       const taxableInBracket = Math.min(remainingIncome, band.limit);
@@ -83,9 +72,14 @@ export class TaxService {
    * Applicable only if the business is VAT-registered.
    */
   calculateVat(amount: number, isVatRegistered: boolean): number {
-    if (!isVatRegistered) return 0;
-    // Standard effective combined rate in 2026 is 20%
-    return Math.round(amount * 0.20 * 100) / 100;
+    return this.vatService.calculateVat(amount, isVatRegistered);
+  }
+
+  /**
+   * Aggregates VAT reports inside the orchestrated TaxService.
+   */
+  calculateVATReport(transactions: Transaction[], startDate?: string, endDate?: string): VatReport {
+    return this.vatService.calculateVATReport(transactions, startDate, endDate);
   }
 
   /**
@@ -100,9 +94,9 @@ export class TaxService {
     let rate = 0;
 
     if (cat.includes('goods') || cat.includes('supply') || cat.includes('product') || cat.includes('material')) {
-      rate = 0.03;
+      rate = this.rules.withholdingTax.goodsRate;
     } else if (cat.includes('work') || cat.includes('repair') || cat.includes('construction') || cat.includes('maintenance')) {
-      rate = 0.05;
+      rate = this.rules.withholdingTax.worksRate;
     } else if (
       cat.includes('service') ||
       cat.includes('consult') ||
@@ -112,7 +106,7 @@ export class TaxService {
       cat.includes('legal') ||
       cat.includes('audit')
     ) {
-      rate = 0.075;
+      rate = this.rules.withholdingTax.servicesRate;
     }
 
     return Math.round(amount * rate * 100) / 100;

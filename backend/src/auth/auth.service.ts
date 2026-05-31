@@ -1,23 +1,24 @@
 import { Injectable, UnauthorizedException, BadRequestException } from '@nestjs/common';
 import { DatabaseService, User } from '../database/database.service';
 import * as crypto from 'crypto';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class AuthService {
   constructor(private readonly db: DatabaseService) {}
 
-  private hashPassword(password: string): string {
-    return crypto.createHash('sha256').update(password).digest('hex');
+  private async hashPassword(password: string): Promise<string> {
+    return bcrypt.hash(password, 10);
   }
 
-  register(email: string, password: string, businessName: string, tin: string, vatRegistered: boolean, industryType: string): Omit<User, 'passwordHash'> {
+  async register(email: string, password: string, businessName: string, tin: string, vatRegistered: boolean, industryType: string): Promise<Omit<User, 'passwordHash'>> {
     const existing = this.db.getUserByEmail(email);
     if (existing) {
       throw new BadRequestException('A business with this email is already registered');
     }
 
     const id = crypto.randomUUID();
-    const passwordHash = this.hashPassword(password);
+    const passwordHash = await this.hashPassword(password);
 
     const newUser: User = {
       id,
@@ -46,14 +47,14 @@ export class AuthService {
     return result;
   }
 
-  login(email: string, password: string): { user: Omit<User, 'passwordHash'>; token: string } {
+  async login(email: string, password: string): Promise<{ user: Omit<User, 'passwordHash'>; token: string }> {
     const user = this.db.getUserByEmail(email);
     if (!user) {
       throw new UnauthorizedException('Invalid email or password');
     }
 
-    const passwordHash = this.hashPassword(password);
-    if (user.passwordHash !== passwordHash) {
+    const isMatch = await bcrypt.compare(password, user.passwordHash);
+    if (!isMatch) {
       throw new UnauthorizedException('Invalid email or password');
     }
 

@@ -10,14 +10,14 @@ export declare class AuthController {
         tin: string;
         vatRegistered: boolean;
         industryType: string;
-    }): Omit<import("../database/database.service").User, "passwordHash">;
+    }): Promise<Omit<import("../database/database.service").User, "passwordHash">>;
     login(body: {
         email: string;
         password?: string;
-    }): {
+    }): Promise<{
         user: Omit<import("../database/database.service").User, "passwordHash">;
         token: string;
-    };
+    }>;
     getProfile(authHeader?: string): Omit<import("../database/database.service").User, "passwordHash">;
     updateProfile(authHeader: string | undefined, body: {
         businessName?: string;

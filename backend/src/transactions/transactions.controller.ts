@@ -1,5 +1,7 @@
 import { Controller, Get, Post, Put, Delete, Body, Param, Headers, UnauthorizedException } from '@nestjs/common';
 import { TransactionsService } from './transactions.service';
+import { CreateTransactionPipe, UpdateTransactionPipe } from './transaction.dto';
+import type { CreateTransactionDto, UpdateTransactionDto } from './transaction.dto';
 
 @Controller('api/transactions')
 export class TransactionsController {
@@ -21,13 +23,7 @@ export class TransactionsController {
   @Post()
   createTransaction(
     @Headers('authorization') authHeader: string | undefined,
-    @Body() body: {
-      type: 'income' | 'expense' | 'payroll';
-      amount: number;
-      category: string;
-      date: string;
-      description: string;
-    }
+    @Body(CreateTransactionPipe) body: CreateTransactionDto
   ) {
     const userId = this.extractUserId(authHeader);
     return this.transactionsService.createTransaction(userId, body);
@@ -37,13 +33,7 @@ export class TransactionsController {
   updateTransaction(
     @Headers('authorization') authHeader: string | undefined,
     @Param('id') id: string,
-    @Body() body: {
-      type?: 'income' | 'expense' | 'payroll';
-      amount?: number;
-      category?: string;
-      date?: string;
-      description?: string;
-    }
+    @Body(UpdateTransactionPipe) body: UpdateTransactionDto
   ) {
     const userId = this.extractUserId(authHeader);
     return this.transactionsService.updateTransaction(userId, id, body);

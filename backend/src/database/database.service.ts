@@ -176,9 +176,9 @@ export class DatabaseService implements OnModuleInit {
     return notification;
   }
 
-  markNotificationAsRead(id: string): boolean {
+  markNotificationAsRead(id: string, userId: string): boolean {
     this.loadData();
-    const notification = this.data.notifications.find(n => n.id === id);
+    const notification = this.data.notifications.find(n => n.id === id && n.userId === userId);
     if (notification) {
       notification.read = true;
       this.saveData();

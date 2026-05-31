@@ -49,5 +49,5 @@ export declare class DatabaseService implements OnModuleInit {
     deleteTransaction(id: string): boolean;
     getNotifications(userId: string): Notification[];
     createNotification(notification: Notification): Notification;
-    markNotificationAsRead(id: string): boolean;
+    markNotificationAsRead(id: string, userId: string): boolean;
 }

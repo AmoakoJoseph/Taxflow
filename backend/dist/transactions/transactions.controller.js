@@ -15,6 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.TransactionsController = void 0;
 const common_1 = require("@nestjs/common");
 const transactions_service_1 = require("./transactions.service");
+const transaction_dto_1 = require("./transaction.dto");
 let TransactionsController = class TransactionsController {
     transactionsService;
     constructor(transactionsService) {
@@ -55,7 +56,7 @@ __decorate([
 __decorate([
     (0, common_1.Post)(),
     __param(0, (0, common_1.Headers)('authorization')),
-    __param(1, (0, common_1.Body)()),
+    __param(1, (0, common_1.Body)(transaction_dto_1.CreateTransactionPipe)),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", void 0)
@@ -64,7 +65,7 @@ __decorate([
     (0, common_1.Put)(':id'),
     __param(0, (0, common_1.Headers)('authorization')),
     __param(1, (0, common_1.Param)('id')),
-    __param(2, (0, common_1.Body)()),
+    __param(2, (0, common_1.Body)(transaction_dto_1.UpdateTransactionPipe)),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object, String, Object]),
     __metadata("design:returntype", void 0)
