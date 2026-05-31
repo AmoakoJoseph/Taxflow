@@ -46,7 +46,7 @@ exports.AuthService = void 0;
 const common_1 = require("@nestjs/common");
 const database_service_1 = require("../database/database.service");
 const crypto = __importStar(require("crypto"));
-const bcrypt = __importStar(require("bcrypt"));
+const bcrypt = __importStar(require("bcryptjs"));
 let AuthService = class AuthService {
     db;
     constructor(db) {
