@@ -1,0 +1,38 @@
+{
+  "users": [
+    {
+      "id": "a480469f-ee4d-43b8-9895-2127c46c36a3",
+      "email": "josh170402@gmail.com",
+      "passwordHash": "ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f",
+      "businessName": "Ace Business",
+      "tin": "GHA-724153723-6",
+      "vatRegistered": true,
+      "industryType": "Services"
+    }
+  ],
+  "transactions": [
+    {
+      "id": "d3e709d2-e886-4130-b488-e5b5198e1df4",
+      "userId": "a480469f-ee4d-43b8-9895-2127c46c36a3",
+      "type": "income",
+      "amount": 4111,
+      "category": "Services",
+      "date": "2026-05-31",
+      "description": "jkjjks",
+      "vatAmount": 822.2,
+      "payeAmount": 0,
+      "whtAmount": 308.33
+    }
+  ],
+  "notifications": [
+    {
+      "id": "aeebc449-0a0d-4566-bc06-0c99a3b43306",
+      "userId": "a480469f-ee4d-43b8-9895-2127c46c36a3",
+      "type": "info",
+      "title": "Welcome to Taxflow! 🇬🇭",
+      "message": "Welcome, Ace Business. Setup your business ledger to automatically calculate VAT, PAYE, and Withholding Taxes. Keep your TIN (GHA-724153723-6) ready for filing.",
+      "date": "2026-05-31",
+      "read": false
+    }
+  ]
+}
